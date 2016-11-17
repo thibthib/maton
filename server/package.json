@@ -1,0 +1,11 @@
+{
+  "name": "maton-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "Thibaut Dutartre <t.dutartre@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.14.0",
+    "socket.io": "^1.5.1"
+  }
+}
