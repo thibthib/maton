@@ -3,7 +3,9 @@ const { mesuresSocket } = require('../common/configuration.js');
 const io = require('socket.io-client');
 const os = require('os');
 
-const socket = io.connect(mesuresSocket);
+const socket = io.connect(mesuresSocket, {
+	query: `machineId=${os.hostname()}`
+});
 
 setInterval(() => {
 	socket.emit(mesureLoadEvent, {
