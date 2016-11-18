@@ -1,7 +1,6 @@
 const { mesureLoadEvent } = require('../common/events.js');
 const { serverPort, mesuresNamespace } = require('../common/configuration.js');
-const app = require('express')();
-const server = require('http').Server(app);
+const server = require('http').createServer();
 const io = require('socket.io')(server);
 const datastore = require('./datastore.js');
 
