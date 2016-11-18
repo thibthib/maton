@@ -7,7 +7,7 @@ const datastore = require('./datastore.js');
 const mesuresIO = io.of(mesuresNamespace);
 mesuresIO.on('connection', socket => {
 	const { machineId } = socket.handshake.query;
-	console.log(`🛰 Probe connection : ${machineId} 🛰`);
+	console.log(`🛰 Probe connection : ${machineId}`);
 	
 	socket.on(mesureLoadEvent, data => {
 		datastore.insert(machineId, data).then(inserted => {
