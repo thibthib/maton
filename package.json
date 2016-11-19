@@ -5,7 +5,16 @@
   "author": "Thibaut Dutartre <t.dutartre@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "d3": "^4.3.0",
     "eslint": "^3.10.2",
-    "eslint-plugin-react": "^6.7.1"
+    "eslint-plugin-react": "^6.7.1",
+    "isomorphic-fetch": "^2.2.1",
+    "next": "^1.1.2",
+    "socket.io-client": "^1.5.1"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
   }
 }
