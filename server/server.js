@@ -18,12 +18,13 @@ dashboardIO.on('connection', () => {
 
 const mesuresIO = io.of(configuration.sockets.measures);
 mesuresIO.on('connection', socket => {
-	const { machineId } = socket.handshake.query;
-	console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machineId} ➡️ ${chalk.blue(' probe connection')}`);
+	const { id, cores } = socket.handshake.query;
+	const machine = { id, cores };
+	console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.blue(' probe connection')}`);
 	
 	socket.on(mesureLoadEvent, data => {
-		datastore.insert(machineId, data).then(inserted => {
-			console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machineId} ➡️ ${chalk.green(' measure insert')}`);
+		datastore.insert(machine, data).then(inserted => {
+			console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.green(' measure insert')}`);
 			dashboardIO.emit(displayLoad, inserted);
 		});
 	});
@@ -33,17 +34,23 @@ app.get(`/${configuration.api.load}`, (request, response) => {
 	response.header('Access-Control-Allow-Origin', '*');
 	response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 	
-	const machineId = request.query.machineId;
-	const now = new Date();
-	const fiveMinutesAgo = new Date(now);
-	fiveMinutesAgo.setMinutes(now.getMinutes()-5);
-	
-	datastore.find(machineId, { timestamp: {
-		$gte: fiveMinutesAgo.getTime()
-	}}).then(results => {
-		response.send(results);
-		console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')}`);
-	});
+	const machine = datastore.getMachine(request.query.machineId);
+	if (typeof machine !== 'undefined') {
+		const fiveMinutesAgo = new Date();
+		fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes()-5);
+		
+		datastore.find(machine, { timestamp: {
+			$gte: fiveMinutesAgo.getTime()
+		}}).then(results => {
+			response.send({
+				machine,
+				measures: results
+			});
+			console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')} ${chalk.dim(`${results.length} measures`)}`);
+		});
+	} else {
+		response.status(404).send({ error: 'Unknown machine' });
+	}
 });
 
 server.listen(configuration.serverPort);

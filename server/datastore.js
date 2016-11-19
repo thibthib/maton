@@ -1,17 +1,17 @@
 const nedb = require('nedb');
 const datastores = new Map();
 
-const getDatastore = machineId => {
-	let datastore = datastores.get(machineId);
+const getDatastore = machine => {
+	let datastore = datastores.get(machine);
 	if (!datastore) {
 		datastore = new nedb();
-		datastores.set(machineId, datastore);
+		datastores.set(machine, datastore);
 	}
 	return datastore;
 };
 
-const insert = (machineId, data) => {
-	const datastore = getDatastore(machineId);
+const insert = (machine, data) => {
+	const datastore = getDatastore(machine);
 	return new Promise((resolve, reject) => {
 		datastore.insert(data, (error, newDocs) => {
 			if (error) {
@@ -23,8 +23,16 @@ const insert = (machineId, data) => {
 	});
 };
 
-const find = (machineId = datastores.keys().next().value, query) => {
-	const datastore = getDatastore(machineId);
+const getMachine = id => {
+	const machines = Array.from(datastores.keys());
+	if (typeof id === 'undefined') {
+		return machines[0];
+	}
+	return machines.find(machine => machine.id === id);
+};
+
+const find = (machine, query) => {
+	const datastore = getDatastore(machine);
 	return new Promise((resolve, reject) => {
 		datastore.find(query).sort({ timestamp: 1 }).exec((error, docs) => {
 			if (error) {
@@ -38,5 +46,6 @@ const find = (machineId = datastores.keys().next().value, query) => {
 
 module.exports = {
 	insert,
-	find
+	find,
+	getMachine
 };

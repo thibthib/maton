@@ -4,7 +4,7 @@ const io = require('socket.io-client');
 const os = require('os');
 
 const socket = io.connect(getURL(sockets.measures), {
-	query: `machineId=${os.hostname()}`
+	query: `id=${os.hostname()}&cores=${os.cpus().length}`
 });
 
 setInterval(() => {
