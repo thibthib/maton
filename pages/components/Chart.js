@@ -1,8 +1,10 @@
 import React from 'react';
 import * as d3 from 'd3';
 import io from 'socket.io-client';
-const { getURL, sockets } = require('../../common/configuration.js');
-const { displayLoad } = require('../../common/events.js');
+import { getURL, sockets } from '../../common/configuration.js';
+import { displayLoad } from '../../common/events.js';
+import Area from './Area.js';
+import Line from './Line.js';
 
 const getXScale = (width) => {
 	const now = new Date();
@@ -20,56 +22,66 @@ const getYScale = (height, data) => {
 	.domain([0, d3.max(data, d => d.load)]);
 };
 
-const getArea = (height, data, scales) => {
-	return d3.area()
-	.x(d => scales.x(d.timestamp))
-	.y0(height)
-	.y1(d => scales.y(d.load))(data);
+const calculateScales = (loadMeasures, width, height) => {
+	return {
+		x: getXScale(width),
+		y: getYScale(height, loadMeasures.loadOne)
+	};
 };
 
-const getMeasureFromData = measure => ({
-	load: measure.load[0],
-	timestamp: new Date(measure.timestamp)
-});
-
-const calculateState = (loadOneMeasures, width, height) => {
+const getLoadsFromMeasure = measure => {
+	const timestamp = new Date(measure.timestamp);
 	return {
-		loadOne: loadOneMeasures,
-		scales: {
-			x: getXScale(width, loadOneMeasures),
-			y: getYScale(height, loadOneMeasures),
-		}
+		loadOne: { load: measure.load[0], timestamp },
+		loadFive: { load: measure.load[1], timestamp },
+		loadFifteen: { load: measure.load[2], timestamp },
 	};
 };
 
 export default class Dashboard extends React.Component {
 	constructor(props) {
 		super(props);
-		const loadOneMeasures = props.data.map(getMeasureFromData);
-		this.state = calculateState(loadOneMeasures, props.width, props.height);
-	}
-	willReceiveProps(nextProps) {
-		if (this.props !== nextProps) {
-			const loadOneMeasures = nextProps.data.map(getMeasureFromData);
-			this.setState(calculateState(loadOneMeasures, nextProps.width, nextProps.height));
-		}
+		const loadMeasures = props.data.reduce((state, measure) => {
+			const loads = getLoadsFromMeasure(measure);
+			state.loadOne.push(loads.loadOne);
+			state.loadFive.push(loads.loadFive);
+			state.loadFifteen.push(loads.loadFifteen);
+			return state;
+		}, {
+			loadOne: [],
+			loadFive: [],
+			loadFifteen: []
+		});
+		this.state = Object.assign({
+			scales: calculateScales(loadMeasures, props.width, props.height)
+		}, loadMeasures);
 	}
 	componentDidMount() {
 		const socket = io.connect(getURL(sockets.dashboard));
 		socket.on(displayLoad, data => {
-			const measure = getMeasureFromData(data);
-			const loadOne = this.state.loadOne.concat(measure);
-			this.setState(calculateState(loadOne, this.props.width, this.props.height));
+			const loads = getLoadsFromMeasure(data);
+			const loadMeasures = {
+				loadOne: this.state.loadOne.concat(loads.loadOne),
+				loadFive: this.state.loadFive.concat(loads.loadFive),
+				loadFifteen: this.state.loadFifteen.concat(loads.loadFifteen)
+			};
+			this.setState(Object.assign({
+				scales: calculateScales(loadMeasures, this.props.width, this.props.height)
+			}, loadMeasures));
 		});
 	}
 	render() {
-		const path = getArea(this.props.height, this.state.loadOne, this.state.scales);
+		const accessors = {
+			x: value => this.state.scales.x(value.timestamp),
+			y: value => this.state.scales.y(value.load)
+		};
+		
 		return (
 			<svg width={this.props.width} height={this.props.height}>
-				<path
-					d={path}
-					fill={'blue'}
-				/>
+				<Area data={this.state.loadOne} accessors={accessors} height={this.props.height} fill={'blue'} />
+				<Line data={this.state.loadOne} accessors={accessors} stroke={'turquoise'} strokeWidth={2} />
+				<Line data={this.state.loadFive} accessors={accessors} stroke={'red'} strokeWidth={2} />
+				<Line data={this.state.loadFifteen} accessors={accessors} stroke={'grey'} strokeWidth={2} />
 			</svg>
 		);
 	}
