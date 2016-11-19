@@ -10,6 +10,6 @@ const socket = io.connect(mesuresSocket, {
 setInterval(() => {
 	socket.emit(mesureLoadEvent, {
 		load: os.loadavg(),
-		timestamp: new Date()
+		timestamp: new Date().getTime()
 	});
 }, 5000);

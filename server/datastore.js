@@ -23,6 +23,20 @@ const insert = (machineId, data) => {
 	});
 };
 
+const find = (machineId = datastores.keys().next().value, query) => {
+	const datastore = getDatastore(machineId);
+	return new Promise((resolve, reject) => {
+		datastore.find(query).sort({ timestamp: 1 }).exec((error, docs) => {
+			if (error) {
+				reject(error);
+			} else {
+				resolve(docs);
+			}
+		});
+	});
+};
+
 module.exports = {
-	insert
+	insert,
+	find
 };

@@ -23,4 +23,21 @@ mesuresIO.on('connection', socket => {
 	});
 });
 
+app.get('/load', (request, response) => {
+	response.header('Access-Control-Allow-Origin', '*');
+	response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+	
+	const machineId = request.query.machineId;
+	const now = new Date();
+	const fiveMinutesAgo = new Date(now);
+	fiveMinutesAgo.setMinutes(now.getMinutes()-5);
+	
+	datastore.find(machineId, { timestamp: {
+		$gte: fiveMinutesAgo.getTime()
+	}}).then(results => {
+		response.send(results);
+		console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')}`);
+	});
+});
+
 server.listen(serverPort);
