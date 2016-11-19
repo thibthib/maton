@@ -1,6 +1,8 @@
 import React from 'react';
 import * as d3 from 'd3';
 import io from 'socket.io-client';
+const { getURL, sockets } = require('../../common/configuration.js');
+const { displayLoad } = require('../../common/events.js');
 
 const getXScale = (width) => {
 	const now = new Date();
@@ -30,13 +32,12 @@ const getMeasureFromData = measure => ({
 	timestamp: new Date(measure.timestamp)
 });
 
-const getStateFromProps = (props) => {
-	const loadOneMeasures = props.data.map(getMeasureFromData);
+const calculateState = (loadOneMeasures, width, height) => {
 	return {
 		loadOne: loadOneMeasures,
 		scales: {
-			x: getXScale(props.width, loadOneMeasures),
-			y: getYScale(props.height, loadOneMeasures),
+			x: getXScale(width, loadOneMeasures),
+			y: getYScale(height, loadOneMeasures),
 		}
 	};
 };
@@ -44,12 +45,22 @@ const getStateFromProps = (props) => {
 export default class Dashboard extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = getStateFromProps(props);
+		const loadOneMeasures = props.data.map(getMeasureFromData);
+		this.state = calculateState(loadOneMeasures, props.width, props.height);
 	}
 	willReceiveProps(nextProps) {
 		if (this.props !== nextProps) {
-			this.setState(getStateFromProps(nextProps));
+			const loadOneMeasures = nextProps.data.map(getMeasureFromData);
+			this.setState(calculateState(loadOneMeasures, nextProps.width, nextProps.height));
 		}
+	}
+	componentDidMount() {
+		const socket = io.connect(getURL(sockets.dashboard));
+		socket.on(displayLoad, data => {
+			const measure = getMeasureFromData(data);
+			const loadOne = this.state.loadOne.concat(measure);
+			this.setState(calculateState(loadOne, this.props.width, this.props.height));
+		});
 	}
 	render() {
 		const path = getArea(this.props.height, this.state.loadOne, this.state.scales);

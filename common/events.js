@@ -1,3 +1,4 @@
 module.exports = {
-	mesureLoadEvent: 'mesure.load'
+	mesureLoadEvent: 'mesure.load',
+	displayLoad: 'display.load'
 };

@@ -1,3 +1,4 @@
+const { mesureLoadEvent, displayLoad } = require('../common/events.js');
 const configuration = require('../common/configuration.js');
 const app = require('express')();
 const server = require('http').Server(app);
@@ -10,14 +11,20 @@ const getConsoleTimestamp = () => {
 	return `${now.getHours() < 10 ? '0' : '' }${now.getHours()}:${now.getMinutes() < 10 ? '0' : '' }${now.getMinutes()}`;
 };
 
+const dashboardIO = io.of(configuration.sockets.dashboard);
+dashboardIO.on('connection', () => {
+	console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.blue('📈 dashboard connection')}`);
+});
+
 const mesuresIO = io.of(configuration.sockets.measures);
 mesuresIO.on('connection', socket => {
 	const { machineId } = socket.handshake.query;
 	console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machineId} ➡️ ${chalk.blue(' probe connection')}`);
 	
 	socket.on(mesureLoadEvent, data => {
-		datastore.insert(machineId, data).then(() => {
+		datastore.insert(machineId, data).then(inserted => {
 			console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machineId} ➡️ ${chalk.green(' measure insert')}`);
+			dashboardIO.emit(displayLoad, inserted);
 		});
 	});
 });
