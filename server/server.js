@@ -1,5 +1,4 @@
-const { mesureLoadEvent } = require('../common/events.js');
-const { serverPort, mesuresNamespace } = require('../common/configuration.js');
+const configuration = require('../common/configuration.js');
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
@@ -11,7 +10,7 @@ const getConsoleTimestamp = () => {
 	return `${now.getHours() < 10 ? '0' : '' }${now.getHours()}:${now.getMinutes() < 10 ? '0' : '' }${now.getMinutes()}`;
 };
 
-const mesuresIO = io.of(mesuresNamespace);
+const mesuresIO = io.of(configuration.sockets.measures);
 mesuresIO.on('connection', socket => {
 	const { machineId } = socket.handshake.query;
 	console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machineId} ➡️ ${chalk.blue(' probe connection')}`);
@@ -23,7 +22,7 @@ mesuresIO.on('connection', socket => {
 	});
 });
 
-app.get('/load', (request, response) => {
+app.get(`/${configuration.api.load}`, (request, response) => {
 	response.header('Access-Control-Allow-Origin', '*');
 	response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 	
@@ -40,4 +39,4 @@ app.get('/load', (request, response) => {
 	});
 });
 
-server.listen(serverPort);
+server.listen(configuration.serverPort);
