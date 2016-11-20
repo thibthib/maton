@@ -5,12 +5,12 @@ import io from 'socket.io-client';
 import { getURL, sockets, api } from '../common/configuration.js';
 import { displayLoad } from '../common/events.js';
 
-const getLoadsFromMeasure = measure => {
+const getLoadsFromMeasure = (measure, cores) => {
 	const timestamp = new Date(measure.timestamp);
 	return {
-		loadOne: { load: measure.load[0], timestamp },
-		loadFive: { load: measure.load[1], timestamp },
-		loadFifteen: { load: measure.load[2], timestamp },
+		loadOne: { load: measure.load[0]/cores, timestamp },
+		loadFive: { load: measure.load[1]/cores, timestamp },
+		loadFifteen: { load: measure.load[2]/cores, timestamp },
 	};
 };
 
@@ -24,7 +24,7 @@ export default class Dashboard extends React.Component {
 		super(props);
 		
 		this.state = props.data.reduce((state, measure) => {
-			const loads = getLoadsFromMeasure(measure);
+			const loads = getLoadsFromMeasure(measure, this.props.machine.cores);
 			state.loadOne.push(loads.loadOne);
 			state.loadFive.push(loads.loadFive);
 			state.loadFifteen.push(loads.loadFifteen);
@@ -38,7 +38,7 @@ export default class Dashboard extends React.Component {
 	componentDidMount() {
 		const socket = io.connect(getURL(sockets.dashboard));
 		socket.on(displayLoad, data => {
-			const loads = getLoadsFromMeasure(data);
+			const loads = getLoadsFromMeasure(data, this.props.machine.cores);
 			const loadMeasures = {
 				loadOne: this.state.loadOne.concat(loads.loadOne),
 				loadFive: this.state.loadFive.concat(loads.loadFive),
@@ -54,7 +54,6 @@ export default class Dashboard extends React.Component {
 					loadOne={this.state.loadOne}
 					loadFive={this.state.loadFive}
 					loadFifteen={this.state.loadFifteen}
-					cores={this.props.machine.cores}
 				/>
 			</div>
 		);

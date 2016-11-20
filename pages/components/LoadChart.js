@@ -9,7 +9,7 @@ const style = {
 	width: 900,
 	height: 500,
 	bottomAxisHeight: 20,
-	rightAxisWidth: 24
+	rightAxisWidth: 30
 };
 
 style.graphHeight = style.height-style.bottomAxisHeight;
