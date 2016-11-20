@@ -5,11 +5,10 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const datastore = require('./datastore.js');
 const chalk = require('chalk');
+const { getConsoleTimestamp } = require('../common/log.js');
+const addAPIEndPoints = require('./api.js');
 
-const getConsoleTimestamp = () => {
-	const now = new Date();
-	return `${now.getHours() < 10 ? '0' : '' }${now.getHours()}:${now.getMinutes() < 10 ? '0' : '' }${now.getMinutes()}`;
-};
+addAPIEndPoints(app);
 
 const dashboardIO = io.of(configuration.sockets.dashboard);
 dashboardIO.on('connection', () => {
@@ -28,29 +27,6 @@ mesuresIO.on('connection', socket => {
 			dashboardIO.emit(displayLoad, inserted);
 		});
 	});
-});
-
-app.get(`/${configuration.api.load}`, (request, response) => {
-	response.header('Access-Control-Allow-Origin', '*');
-	response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-	
-	const machine = datastore.getMachine(request.query.machineId);
-	if (typeof machine !== 'undefined') {
-		const fifteenMinutesAgo = new Date();
-		fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes()-15);
-		
-		datastore.find(machine, { timestamp: {
-			$gte: fifteenMinutesAgo.getTime()
-		}}).then(results => {
-			response.send({
-				machine,
-				measures: results
-			});
-			console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')} ${chalk.dim(`${results.length} measures`)}`);
-		});
-	} else {
-		response.status(404).send({ error: 'Unknown machine' });
-	}
 });
 
 server.listen(configuration.serverPort);
