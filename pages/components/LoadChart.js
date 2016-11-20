@@ -20,6 +20,23 @@ style.bottomAxisCSS = css({
 style.rightAxisCSS = css({
 	transform: `translateX(${style.graphWidth}px)`
 });
+style.loadOneAreaCSS = css({
+	fill: '#99CCE6'
+});
+style.loadOneLineCSS = css({
+	stroke: '#3299CC',
+	strokeWidth: 1
+});
+style.loadFiveLineCSS = css({
+	stroke: '#8F7DB7',
+	strokeWidth: 3
+});
+style.loadFifteenLineCSS = css({
+	stroke: '#FECD2F',
+	strokeWidth: 3
+});
+
+
 
 const getXScale = (width) => {
 	const now = new Date();
@@ -66,10 +83,10 @@ export default class LoadChart extends React.Component {
 		return (
 			<svg width={style.width} height={style.height}>
 				<g>
-					<Area data={this.props.loadOne} accessors={this.accessors} height={style.graphHeight} fill={'blue'} />
-					<Line data={this.props.loadOne} accessors={this.accessors} stroke={'turquoise'} strokeWidth={2} />
-					<Line data={this.props.loadFive} accessors={this.accessors} stroke={'red'} strokeWidth={2} />
-					<Line data={this.props.loadFifteen} accessors={this.accessors} stroke={'grey'} strokeWidth={2} />
+					<Area data={this.props.loadOne} accessors={this.accessors} height={style.graphHeight} className={style.loadOneAreaCSS} />
+					<Line data={this.props.loadOne} accessors={this.accessors} className={style.loadOneLineCSS} />
+					<Line data={this.props.loadFive} accessors={this.accessors} className={style.loadFiveLineCSS} />
+					<Line data={this.props.loadFifteen} accessors={this.accessors} className={style.loadFifteenLineCSS} />
 				</g>
 				<Axis generator={d3.axisBottom(this.state.scales.x)} className={style.bottomAxisCSS}/>
 				<Axis generator={d3.axisRight(this.state.scales.y)} className={style.rightAxisCSS}/>
