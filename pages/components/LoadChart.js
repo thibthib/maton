@@ -8,12 +8,17 @@ import css from 'next/css';
 const style = {
 	width: 900,
 	height: 500,
-	bottomAxisHeight: 20
+	bottomAxisHeight: 20,
+	rightAxisWidth: 24
 };
 
 style.graphHeight = style.height-style.bottomAxisHeight;
+style.graphWidth = style.width-style.rightAxisWidth;
 style.bottomAxisCSS = css({
 	transform: `translateY(${style.graphHeight}px)`
+});
+style.rightAxisCSS = css({
+	transform: `translateX(${style.graphWidth}px)`
 });
 
 const getXScale = (width) => {
@@ -35,7 +40,7 @@ const getYScale = (height, data) => {
 const getStateFromProps = props => {
 	return {
 		scales: {
-			x: getXScale(style.width),
+			x: getXScale(style.graphWidth),
 			y: getYScale(style.graphHeight, props.loadOne)
 		}
 	};
@@ -67,6 +72,7 @@ export default class LoadChart extends React.Component {
 					<Line data={this.props.loadFifteen} accessors={this.accessors} stroke={'grey'} strokeWidth={2} />
 				</g>
 				<Axis generator={d3.axisBottom(this.state.scales.x)} className={style.bottomAxisCSS}/>
+				<Axis generator={d3.axisRight(this.state.scales.y)} className={style.rightAxisCSS}/>
 			</svg>
 		);
 	}
