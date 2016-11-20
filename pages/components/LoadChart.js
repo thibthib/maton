@@ -41,7 +41,7 @@ const getStateFromProps = props => {
 	};
 };
 
-export default class Dashboard extends React.Component {
+export default class LoadChart extends React.Component {
 	constructor(props) {
 		super(props);
 

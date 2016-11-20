@@ -1,5 +1,5 @@
 import React from 'react';
-import Chart from './components/Chart.js';
+import LoadChart from './components/LoadChart.js';
 import 'isomorphic-fetch';
 import io from 'socket.io-client';
 import { getURL, sockets, api } from '../common/configuration.js';
@@ -14,7 +14,7 @@ const getLoadsFromMeasure = measure => {
 	};
 };
 
-export default class App extends React.Component {
+export default class Dashboard extends React.Component {
 	static getInitialProps() {
 		return fetch(getURL(api.load))
 		.then(response => response.json())
@@ -50,7 +50,7 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<Chart
+				<LoadChart
 					loadOne={this.state.loadOne}
 					loadFive={this.state.loadFive}
 					loadFifteen={this.state.loadFifteen}
