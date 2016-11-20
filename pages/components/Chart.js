@@ -1,10 +1,20 @@
 import React from 'react';
 import * as d3 from 'd3';
-import io from 'socket.io-client';
-import { getURL, sockets } from '../../common/configuration.js';
-import { displayLoad } from '../../common/events.js';
 import Area from './Area.js';
 import Line from './Line.js';
+import Axis from './Axis.js';
+import css from 'next/css';
+
+const style = {
+	width: 900,
+	height: 500,
+	bottomAxisHeight: 20
+};
+
+style.graphHeight = style.height-style.bottomAxisHeight;
+style.bottomAxisCSS = css({
+	transform: `translateY(${style.graphHeight}px)`
+});
 
 const getXScale = (width) => {
 	const now = new Date();
@@ -22,66 +32,41 @@ const getYScale = (height, data) => {
 	.domain([0, d3.max(data, d => d.load)]);
 };
 
-const calculateScales = (loadMeasures, width, height) => {
+const getStateFromProps = props => {
 	return {
-		x: getXScale(width),
-		y: getYScale(height, loadMeasures.loadOne)
-	};
-};
-
-const getLoadsFromMeasure = measure => {
-	const timestamp = new Date(measure.timestamp);
-	return {
-		loadOne: { load: measure.load[0], timestamp },
-		loadFive: { load: measure.load[1], timestamp },
-		loadFifteen: { load: measure.load[2], timestamp },
+		scales: {
+			x: getXScale(style.width),
+			y: getYScale(style.graphHeight, props.loadOne)
+		}
 	};
 };
 
 export default class Dashboard extends React.Component {
 	constructor(props) {
 		super(props);
-		const loadMeasures = props.data.reduce((state, measure) => {
-			const loads = getLoadsFromMeasure(measure);
-			state.loadOne.push(loads.loadOne);
-			state.loadFive.push(loads.loadFive);
-			state.loadFifteen.push(loads.loadFifteen);
-			return state;
-		}, {
-			loadOne: [],
-			loadFive: [],
-			loadFifteen: []
-		});
-		this.state = Object.assign({
-			scales: calculateScales(loadMeasures, props.width, props.height)
-		}, loadMeasures);
-	}
-	componentDidMount() {
-		const socket = io.connect(getURL(sockets.dashboard));
-		socket.on(displayLoad, data => {
-			const loads = getLoadsFromMeasure(data);
-			const loadMeasures = {
-				loadOne: this.state.loadOne.concat(loads.loadOne),
-				loadFive: this.state.loadFive.concat(loads.loadFive),
-				loadFifteen: this.state.loadFifteen.concat(loads.loadFifteen)
-			};
-			this.setState(Object.assign({
-				scales: calculateScales(loadMeasures, this.props.width, this.props.height)
-			}, loadMeasures));
-		});
-	}
-	render() {
-		const accessors = {
+
+		this.state = getStateFromProps(props);
+		
+		this.accessors = {
 			x: value => this.state.scales.x(value.timestamp),
 			y: value => this.state.scales.y(value.load)
 		};
-		
+	}
+	componentWillReceiveProps(nextProps) {
+		if (this.props !== nextProps) {
+			this.setState(getStateFromProps(nextProps));
+		}
+	}
+	render() {
 		return (
-			<svg width={this.props.width} height={this.props.height}>
-				<Area data={this.state.loadOne} accessors={accessors} height={this.props.height} fill={'blue'} />
-				<Line data={this.state.loadOne} accessors={accessors} stroke={'turquoise'} strokeWidth={2} />
-				<Line data={this.state.loadFive} accessors={accessors} stroke={'red'} strokeWidth={2} />
-				<Line data={this.state.loadFifteen} accessors={accessors} stroke={'grey'} strokeWidth={2} />
+			<svg width={style.width} height={style.height}>
+				<g>
+					<Area data={this.props.loadOne} accessors={this.accessors} height={style.graphHeight} fill={'blue'} />
+					<Line data={this.props.loadOne} accessors={this.accessors} stroke={'turquoise'} strokeWidth={2} />
+					<Line data={this.props.loadFive} accessors={this.accessors} stroke={'red'} strokeWidth={2} />
+					<Line data={this.props.loadFifteen} accessors={this.accessors} stroke={'grey'} strokeWidth={2} />
+				</g>
+				<Axis generator={d3.axisBottom(this.state.scales.x)} className={style.bottomAxisCSS}/>
 			</svg>
 		);
 	}
