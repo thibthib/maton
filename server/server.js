@@ -36,11 +36,11 @@ app.get(`/${configuration.api.load}`, (request, response) => {
 	
 	const machine = datastore.getMachine(request.query.machineId);
 	if (typeof machine !== 'undefined') {
-		const fiveMinutesAgo = new Date();
-		fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes()-5);
+		const fifteenMinutesAgo = new Date();
+		fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes()-15);
 		
 		datastore.find(machine, { timestamp: {
-			$gte: fiveMinutesAgo.getTime()
+			$gte: fifteenMinutesAgo.getTime()
 		}}).then(results => {
 			response.send({
 				machine,

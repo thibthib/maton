@@ -36,16 +36,14 @@ style.loadFifteenLineCSS = css({
 	strokeWidth: 3
 });
 
-
-
 const getXScale = (width) => {
 	const now = new Date();
-	const fiveMinutesAgo = new Date(now);
-	fiveMinutesAgo.setMinutes(now.getMinutes()-5);
+	const fifteenMinutesAgo = new Date(now);
+	fifteenMinutesAgo.setMinutes(now.getMinutes()-15);
 	
 	return d3.scaleTime()
 	.range([0, width])
-	.domain([fiveMinutesAgo, now]);
+	.domain([fifteenMinutesAgo, now]);
 };
 
 const getYScale = (height, data) => {
