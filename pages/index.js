@@ -3,7 +3,6 @@ import LoadChart from './components/LoadChart.js';
 import 'isomorphic-fetch';
 import io from 'socket.io-client';
 import { getURL, sockets, api } from '../common/configuration.js';
-import { displayLoad } from '../common/events.js';
 
 const getLoadsFromMeasure = (measure, cores) => {
 	const timestamp = new Date(measure.timestamp);
@@ -37,7 +36,7 @@ export default class Dashboard extends React.Component {
 	}
 	componentDidMount() {
 		const socket = io.connect(getURL(sockets.dashboard));
-		socket.on(displayLoad, data => {
+		socket.on('new.measure', data => {
 			const loads = getLoadsFromMeasure(data, this.props.machine.cores);
 			const loadMeasures = {
 				loadOne: this.state.loadOne.concat(loads.loadOne),

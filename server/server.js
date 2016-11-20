@@ -1,4 +1,3 @@
-const { displayLoad } = require('../common/events.js');
 const configuration = require('../common/configuration.js');
 const app = require('express')();
 const server = require('http').Server(app);
@@ -13,7 +12,7 @@ const dashboards = getDashboards(io);
 const measuresStore = getMeasuresStore(io);
 
 measuresStore.on('measure.insertion', inserted => {
-	dashboards.emit(displayLoad, inserted);
+	dashboards.emit('new.measure', inserted);
 });
 
 server.listen(configuration.serverPort);
