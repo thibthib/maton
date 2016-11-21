@@ -44,6 +44,22 @@ style.thresholdCSS = css({
 	strokeWidth: 1,
 	strokeDasharray: 3
 });
+style.legend = css({
+	fontWeight: 'bold'
+});
+style.legendItem = css({
+	display: 'inline-block',
+	padding: '0 16px'
+});
+style.loadOneLabel = css({
+	color: '#3299CC'
+});
+style.loadFiveLabel = css({
+	color: '#8F7DB7'
+});
+style.loadFifteenLabel = css({
+	color: '#FECD2F'
+});
 
 const getStateFromProps = props => {
 	const now = new Date();
@@ -87,17 +103,34 @@ export default class LoadChart extends React.Component {
 	}
 	render() {
 		return (
-			<svg width={style.width} height={style.height} className={style.graphCSS}>
-				<g>
-					<Area data={this.props.loadOne} accessors={this.accessors} height={style.graphHeight} className={style.loadOneAreaCSS} />
-					<Line data={this.props.loadOne} accessors={this.accessors} className={style.loadOneLineCSS} />
-					<Line data={this.props.loadFive} accessors={this.accessors} className={style.loadFiveLineCSS} />
-					<Line data={this.props.loadFifteen} accessors={this.accessors} className={style.loadFifteenLineCSS} />
-					<Line data={this.state.thresholdData} accessors={this.accessors} className={style.thresholdCSS} />
-				</g>
-				<Axis generator={d3.axisBottom(this.state.scales.x)} className={style.bottomAxisCSS}/>
-				<Axis generator={d3.axisRight(this.state.scales.y)} className={style.rightAxisCSS}/>
-			</svg>
+			<div>
+				<svg width={style.width} height={style.height} className={style.graphCSS}>
+					<g>
+						<Area data={this.props.loadOne} accessors={this.accessors} height={style.graphHeight} className={style.loadOneAreaCSS} />
+						<Line data={this.props.loadOne} accessors={this.accessors} className={style.loadOneLineCSS} />
+						<Line data={this.props.loadFive} accessors={this.accessors} className={style.loadFiveLineCSS} />
+						<Line data={this.props.loadFifteen} accessors={this.accessors} className={style.loadFifteenLineCSS} />
+						<Line data={this.state.thresholdData} accessors={this.accessors} className={style.thresholdCSS} />
+					</g>
+					<Axis generator={d3.axisBottom(this.state.scales.x)} className={style.bottomAxisCSS}/>
+					<Axis generator={d3.axisRight(this.state.scales.y)} className={style.rightAxisCSS}/>
+				</svg>
+				<div className={style.legend}>
+					<div className={style.legendItem}>
+						<span className={style.loadOneLabel}>{'1 min average : '}</span>
+						<span>{`${this.props.loadOne[this.props.loadOne.length-1].load.toFixed(2)}`}</span>
+					</div>
+					<div className={style.legendItem}>
+						<span className={style.loadFiveLabel}>{'5 min average : '}</span>
+						<span>{`${this.props.loadFive[this.props.loadFive.length-1].load.toFixed(2)}`}</span>
+					</div>
+					<div className={style.legendItem}>
+						<span className={style.loadFifteenLabel}>{'15 min average : '}</span>
+						<span>{`${this.props.loadFifteen[this.props.loadFifteen.length-1].load.toFixed(2)}`}</span>
+					</div>
+				</div>
+			</div>
+			
 		);
 	}
 }
