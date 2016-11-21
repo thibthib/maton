@@ -5,14 +5,24 @@ const io = require('socket.io')(server);
 const addAPIEndPoints = require('./api.js');
 const getMeasuresStore = require('./measures.js');
 const getDashboards = require('./dashboards.js');
+const getAlerter = require('./alerter.js');
 
 addAPIEndPoints(app);
 
 const dashboards = getDashboards(io);
-const measuresStore = getMeasuresStore(io);
 
-measuresStore.on('measure.insertion', inserted => {
-	dashboards.emit('new.measure', inserted);
+const alerter = getAlerter(io);
+alerter.on('alert.start', alert => {
+	dashboards.emit('alert.start', alert);
+});
+alerter.on('alert.end', alert => {
+	dashboards.emit('alert.end', alert);
+});
+
+const measuresStore = getMeasuresStore(io);
+measuresStore.on('measure.insertion', ({ machine, newMeasure }) => {
+	dashboards.emit('new.measure', newMeasure);
+	alerter.emit('new.measure', machine);
 });
 
 server.listen(configuration.serverPort);

@@ -1,5 +1,5 @@
 const { EventEmitter } = require('events');
-const probesEventsEmitter = new EventEmitter();
+const measuresStoreEmitter = new EventEmitter();
 const { sockets } = require('../common/configuration.js');
 const chalk = require('chalk');
 const { getConsoleTimestamp } = require('../common/log.js');
@@ -13,12 +13,12 @@ module.exports = io => {
 		console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.blue(' probe connection')}`);
 		
 		socket.on('new.load', data => {
-			datastore.insert(machine, data).then(inserted => {
+			datastore.insert(machine, data).then(newMeasure => {
 				console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.green(' measure insert')}`);
-				probesEventsEmitter.emit('measure.insertion', inserted);
+				measuresStoreEmitter.emit('measure.insertion', { machine, newMeasure });
 			});
 		});
 	});
 	
-	return probesEventsEmitter;
+	return measuresStoreEmitter;
 };
