@@ -23,7 +23,7 @@ module.exports = () => {
 			const currentAlert = currentAlerts.get(machine);
 			if (typeof currentAlert === 'undefined') {
 				if (averageLoad > LoadThreshold) {
-					const alertStartMessage = `Alert start | High load ➡️ ${averageLoad}`;
+					const alertStartMessage = `Alert start | High load ➡️ ${averageLoad.toFixed(2)}`;
 					currentAlerts.set(machine, alertStartMessage);
 					aleterEmitter.emit('alert.start', {
 						machine,
@@ -33,7 +33,7 @@ module.exports = () => {
 				}
 			} else {
 				if (averageLoad <= LoadThreshold) {
-					const alertEndMessage = `${getConsoleTimestamp()} Alert end | Load back to normal ➡️ ${averageLoad}`;
+					const alertEndMessage = `${getConsoleTimestamp()} Alert end | Load back to normal ➡️ ${averageLoad.toFixed(2)}`;
 					currentAlerts.delete(machine);
 					aleterEmitter.emit('alert.end', {
 						machine,
