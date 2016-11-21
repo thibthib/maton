@@ -13,7 +13,7 @@ module.exports = () => {
 		const thresoldAgo = new Date();
 		thresoldAgo.setMinutes(thresoldAgo.getMinutes()-(DurationThresold-1));
 		
-		return datastore.find(machine, { timestamp: {
+		return datastore.findMeasures(machine, { timestamp: {
 			$gte: thresoldAgo.getTime()
 		}}).then(results => {
 			const averageLoad = results.reduce((sum, result) => {
@@ -23,23 +23,31 @@ module.exports = () => {
 			const currentAlert = currentAlerts.get(machine);
 			if (typeof currentAlert === 'undefined') {
 				if (averageLoad > LoadThreshold) {
-					const alertStartMessage = `Alert start | High load ➡️ ${averageLoad.toFixed(2)}`;
-					currentAlerts.set(machine, alertStartMessage);
-					aleterEmitter.emit('alert.start', {
+					const message = `High load > ${averageLoad.toFixed(2)}`;
+					const alert = {
 						machine,
-						alertStartMessage
-					});
-					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.red(alertStartMessage)} on machine ${machine.id}`);
+						message,
+						type: 'start',
+						timestamp: new Date().getTime()
+					};
+					currentAlerts.set(machine, alert);
+					datastore.insertAlert(machine, alert);
+					aleterEmitter.emit('alert.start', alert);
+					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.red(message)} on machine ${machine.id}`);
 				}
 			} else {
 				if (averageLoad <= LoadThreshold) {
-					const alertEndMessage = `${getConsoleTimestamp()} Alert end | Load back to normal ➡️ ${averageLoad.toFixed(2)}`;
-					currentAlerts.delete(machine);
-					aleterEmitter.emit('alert.end', {
+					const message = `Load back to normal > ${averageLoad.toFixed(2)}`;
+					const alert = {
 						machine,
-						alertEndMessage
-					});
-					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.blue(alertEndMessage)} on machine ${machine.id}`);
+						message,
+						type: 'stop',
+						timestamp: new Date().getTime()
+					};
+					currentAlerts.delete(machine);
+					datastore.insertAlert(machine, alert);
+					aleterEmitter.emit('alert.end', alert);
+					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.blue(message)} on machine ${machine.id}`);
 				}
 			}
 		});

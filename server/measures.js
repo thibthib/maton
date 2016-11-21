@@ -13,7 +13,7 @@ module.exports = io => {
 		console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.blue(' probe connection')}`);
 		
 		socket.on('new.load', data => {
-			datastore.insert(machine, data).then(newMeasure => {
+			datastore.insertMeasure(machine, data).then(newMeasure => {
 				console.log(`${chalk.dim(getConsoleTimestamp())} 🛰 ${machine.id} ➡️ ${chalk.green(' measure insert')}`);
 				measuresStoreEmitter.emit('measure.insertion', { machine, newMeasure });
 			});

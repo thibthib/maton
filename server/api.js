@@ -13,14 +13,18 @@ module.exports = app => {
 			const fifteenMinutesAgo = new Date();
 			fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes()-15);
 			
-			datastore.find(machine, { timestamp: {
+			const measures = datastore.findMeasures(machine, { timestamp: {
 				$gte: fifteenMinutesAgo.getTime()
-			}}).then(results => {
+			}});
+			const alerts = datastore.findAlerts(machine, {});
+			
+			Promise.all([measures, alerts]).then(([measures, alerts]) => {
 				response.send({
 					machine,
-					measures: results
+					measures,
+					alerts
 				});
-				console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')} ${chalk.dim(`${results.length} measures`)}`);
+				console.log(`${chalk.dim(getConsoleTimestamp())} 📦 ${chalk.bold(' API request')} ${chalk.dim(`${measures.length} measures | ${alerts.length} alerts`)}`);
 			});
 		} else {
 			response.status(404).send({ error: 'Unknown machine' });
