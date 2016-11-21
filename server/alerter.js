@@ -3,6 +3,7 @@ const aleterEmitter = new EventEmitter();
 const datastore = require('./datastore.js');
 const currentAlerts = new Map();
 const { getConsoleTimestamp } = require('../common/log.js');
+const chalk = require('chalk');
 
 const LoadThreshold = 1;
 const DurationThresold = 2;
@@ -16,19 +17,19 @@ module.exports = () => {
 			$gte: thresoldAgo.getTime()
 		}}).then(results => {
 			const averageLoad = results.reduce((sum, result) => {
-				return result.load[0];
-			}, 0) / machine.cores / results.length;
+				return sum+result.load[0];
+			}, 0) / results.length / machine.cores;
 			
 			const currentAlert = currentAlerts.get(machine);
 			if (typeof currentAlert === 'undefined') {
 				if (averageLoad > LoadThreshold) {
-					const alertStartMessage = `${getConsoleTimestamp()} Alert start | High load ➡️ ${averageLoad}`;
+					const alertStartMessage = `Alert start | High load ➡️ ${averageLoad}`;
 					currentAlerts.set(machine, alertStartMessage);
 					aleterEmitter.emit('alert.start', {
 						machine,
 						alertStartMessage
 					});
-					console.log(`${alertStartMessage} on machine ${machine.id}`);
+					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.red(alertStartMessage)} on machine ${machine.id}`);
 				}
 			} else {
 				if (averageLoad <= LoadThreshold) {
@@ -38,7 +39,7 @@ module.exports = () => {
 						machine,
 						alertEndMessage
 					});
-					console.log(`${alertEndMessage} on machine ${machine.id}`);
+					console.log(`${chalk.dim(getConsoleTimestamp())} ${chalk.blue(alertEndMessage)} on machine ${machine.id}`);
 				}
 			}
 		});
