@@ -2,6 +2,9 @@
 
 This module is the measures store. It can receive them from the probes, store them, as well as emitting events when new measures arrive or querying them in an API.
 
+## How-to run
+`npm start`
+
 ## 📈 Improvements plan
 
 - **Measures** : there's currently no structure around measures, it's just the load average for now. I want to add the ability to store and query different types of measures ! Memory, CPU usage...

@@ -22,10 +22,15 @@ The app has three main parts :
 - *The server* [`/server`](https://github.com/thibthib/maton/tree/master/server/) is where the measures (only the load for now) are stored. It has an API entry point for getting data as well as a socket that sends events for each new measure or alert to...
 - *The dashboards* [`/pages`](https://github.com/thibthib/maton/tree/master/pages/) (I would have named it dashboard if I could) is where we display meaningful and beautiful graphs and alerts.
 
+## How-to run
+`npm start`
+
 ## 📈 Improvements plan
 
 [➡️ For the probes, follow me](https://github.com/thibthib/maton/tree/master/probe/)
+
 [➡️ For the server, it's here](https://github.com/thibthib/maton/tree/master/server)
+
 For the dashboard, stay here
 
 - **Share more with the server** : There's a lot of stuff (events, configuration) that's common to both server and dashboards. I shared a little, but there's still work to do (alerts threshold, graph time span, etc...).

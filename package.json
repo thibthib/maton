@@ -14,7 +14,9 @@
   },
   "scripts": {
     "dev": "next",
+    "prebuild": "npm install",
     "build": "next build",
+    "prestart": "npm run build",
     "start": "next start"
   }
 }

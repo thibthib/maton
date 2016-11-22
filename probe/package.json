@@ -8,6 +8,7 @@
     "socket.io-client": "^1.5.1"
   },
   "scripts": {
+    "prestart": "npm install",
     "start": "node probe.js"
   }
 }
