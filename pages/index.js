@@ -4,7 +4,7 @@ import 'isomorphic-fetch';
 import io from 'socket.io-client';
 import { getURL, sockets, api } from '../common/configuration.js';
 import css, { merge } from 'next/css';
-const { getConsoleTimestamp } = require('../common/log.js');
+import { getConsoleTimestamp } from '../common/log.js';
 
 const getLoadsFromMeasure = (measure, cores) => {
 	const timestamp = new Date(measure.timestamp);
